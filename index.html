@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>قصة</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=El+Messiri&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'El Messiri', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    /* Header with settings and messaging icons */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #1877f2;
+      color: #fff;
+      padding: 10px;
+      text-align: right;
+      z-index: 1000;
+    }
+    #header a {
+      color: #fff;
+      font-size: 24px;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+    /* Adjust content to not overlap header */
+    #content {
+      padding-top: 60px;
+      padding-bottom: 80px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .login-box input[type="text"],
+    .login-box input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 10px;
+      background-color: #1877f2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .login-box button:hover {
+      background-color: #155db2;
+    }
+    #mainApp { display: none; }
+    .section { display: none; padding: 20px; }
+    .section.active { display: block; }
+    .post, .profile-card, .user-post, .search-result, .comment-card {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .post-header, .publisher-header {
+      display: flex;
+      align-items: center;
+    }
+    .post-header img, .publisher-header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+    .post-buttons {
+      margin-top: 10px;
+    }
+    .post-buttons button {
+      margin-right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .delete-post-btn, .delete-comment-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #e74c3c;
+      font-size: 18px;
+    }
+    #nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #ccc;
+      padding: 10px 0;
+    }
+    #nav button {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+    }
+    .profile-card {
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+    .profile-card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #1877f2;
+    }
+    .profile-card h2 { margin: 10px 0; }
+    .profile-card p { margin: 5px 0; }
+    #logoutBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #1877f2;
+    }
+    .comments-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .comment-card {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .comment-card img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+    .comment-content { display: flex; flex-direction: column; }
+    .comment-content strong { font-size: 14px; }
+    .comment-content p {
+      background: #f0f2f5;
+      padding: 8px 12px;
+      border-radius: 20px;
+      margin: 2px 0 0;
+    }
+    .comments-input {
+      display: flex;
+    }
+    .comments-input input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      margin-right: 8px;
+    }
+    .comments-input button {
+      padding: 8px 12px;
+      background-color: #1877f2;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    #backFromComments {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .verify-icon { margin-left: 5px; color: #1877f2; }
+    /* Publish Section Styling */
+    #publishSection {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    #publishSection h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    #publishSection textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+      min-height: 100px;
+    }
+    #publishSection button {
+      display: block;
+      margin: 15px auto 0;
+      padding: 10px 20px;
+      background-color: #1877f2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #publishSection button:hover {
+      background-color: #155db2;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginContainer" class="container">
+    <div class="login-box">
+      <h2>تسجيل الدخول / التسجيل</h2>
+      <form id="registerForm">
+        <input type="text" id="email" placeholder="البريد الإلكتروني أو رقم الهاتف" required>
+        <input type="password" id="password" placeholder="كلمة المرور" required>
+        <input type="text" id="name" placeholder="الاسم (للتسجيل)" required>
+        <button type="submit">متابعة</button>
+      </form>
+    </div>
+  </div>
+  <div id="mainApp">
+    <div id="header">
+      <a href="https://sportsore.github.io/Sting313/" target="_blank" id="settingsLink"><i class="fa-solid fa-gear"></i></a>
+      <a href="https://sportsore.github.io/Chat313/" target="_blank" id="messagingLink"><i class="fa-solid fa-comments"></i></a>
+    </div>
+    <div id="content">
+      <div id="homeSection" class="section active">
+        <h2>القصص</h2>
+        <div id="postsContainer"></div>
+      </div>
+      <div id="profileSection" class="section">
+        <div class="profile-card" id="profileCard"></div>
+        <h3>قصصي</h3>
+        <div id="userPosts"></div>
+      </div>
+      <div id="publisherProfileSection" class="section">
+        <div class="profile-card" id="publisherProfileCard"></div>
+        <h3>قصصه</h3>
+        <div id="publisherPosts"></div>
+      </div>
+      <div id="searchSection" class="section">
+        <h2>بحث عن مستخدمين</h2>
+        <input type="text" id="searchInput" placeholder="ابحث باسم أو برقم هاتف" style="width:80%;">
+        <button id="searchBtn">بحث</button>
+        <div id="searchResults"></div>
+      </div>
+      <div id="publishSection" class="section">
+        <h2>نشر قصة</h2>
+        <textarea id="postText" placeholder="اكتب قصتك هنا..."></textarea>
+        <button id="publishPostBtn">نشر</button>
+      </div>
+      <div id="commentsSection" class="section">
+        <button id="backFromComments"><i class="fa-solid fa-arrow-right"></i></button>
+        <h2>التعليقات</h2>
+        <div class="comments-container" id="commentsContainer"></div>
+        <div class="comments-input">
+          <input type="text" id="commentInput" placeholder="اكتب تعليقك...">
+          <button id="addCommentBtn">إرسال</button>
+        </div>
+      </div>
+    </div>
+    <div id="nav">
+      <button id="navHome"><i class="fa-solid fa-house"></i></button>
+      <button id="navProfile"><i class="fa-solid fa-user"></i></button>
+      <button id="navSearch"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <button id="navPublish"><i class="fa-solid fa-plus"></i></button>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-storage.js";
+    import { getFirestore, doc, setDoc, collection, query, orderBy, onSnapshot, addDoc, where, getDocs, getDoc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyDHtEWjd44_pcStCaEHj0xGB7ew0TZ5JyA",
+      authDomain: "callvideos-ca091.firebaseapp.com",
+      databaseURL: "https://callvideos-ca091-default-rtdb.firebaseio.com",
+      projectId: "callvideos-ca091",
+      storageBucket: "callvideos-ca091.firebasestorage.app",
+      messagingSenderId: "436150743773",
+      appId: "1:436150743773:web:28fac5d675c7ffe536e134",
+      measurementId: "G-933X277Q5Y"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    const db = getFirestore(app);
+    
+    let currentUser = null, currentPostId = null, currentUserVerified = false, isPublishing = false;
+    
+    function generateRandomPhone() {
+      let digits = "";
+      for (let i = 0; i < 8; i++) {
+        digits += Math.floor(Math.random() * 10).toString();
+      }
+      return "+313 71 " + digits.slice(0,2) + " " + digits.slice(2,4) + " " + digits.slice(4,6) + " " + digits.slice(6,8);
+    }
+    
+    function formatLikes(likes) {
+      if(likes >= 1000000) return (likes/1000000).toFixed(1).replace(/\.0$/, "") + "M";
+      if(likes >= 1000) return (likes/1000).toFixed(1).replace(/\.0$/, "") + "K";
+      return likes;
+    }
+    
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const identifier = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value;
+      if(identifier.startsWith("+313")){
+        const q = query(collection(db, "users"), where("phone", "==", identifier));
+        const qs = await getDocs(q);
+        if(qs.empty){ alert("لا يوجد حساب بهذا الرقم"); return; }
+        let userEmail = "";
+        qs.forEach(docSnap => { userEmail = docSnap.data().email; });
+        try {
+          await signInWithEmailAndPassword(auth, userEmail, password);
+          alert("تم تسجيل الدخول بنجاح");
+          document.getElementById("loginContainer").style.display = "none";
+          document.getElementById("mainApp").style.display = "block";
+        } catch(e) { alert(e.message); }
+      } else {
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, identifier, password);
+          const user = userCredential.user;
+          let photoURL = "https://stek57-bb2b53411dc1.herokuapp.com/dl/67c46ba307884f0f91e5670c";
+          await updateProfile(user, { displayName: name, photoURL: photoURL });
+          const phone = generateRandomPhone();
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            name: name,
+            email: identifier,
+            photoURL: photoURL,
+            phone: phone,
+            verified: false
+          });
+          alert("تم التسجيل بنجاح\nرقم الهاتف: " + phone);
+          document.getElementById("loginContainer").style.display = "none";
+          document.getElementById("mainApp").style.display = "block";
+        } catch(error) {
+          if(error.code === "auth/email-already-in-use"){
+            try {
+              await signInWithEmailAndPassword(auth, identifier, password);
+              alert("تم تسجيل الدخول بنجاح");
+              document.getElementById("loginContainer").style.display = "none";
+              document.getElementById("mainApp").style.display = "block";
+            } catch(loginError) { alert(loginError.message); }
+          } else { alert(error.message); }
+        }
+      }
+    });
+    
+    onAuthStateChanged(auth, async (user) => {
+      if(user){
+        currentUser = user;
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("mainApp").style.display = "block";
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userData = userDoc.exists() ? userDoc.data() : {};
+        currentUserVerified = userData.verified || false;
+        loadProfile();
+        loadUserPosts();
+      }
+    });
+    
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+    
+    document.getElementById("navHome").addEventListener("click", () => { showSection("homeSection"); });
+    document.getElementById("navProfile").addEventListener("click", () => { showSection("profileSection"); });
+    document.getElementById("navSearch").addEventListener("click", () => { showSection("searchSection"); });
+    document.getElementById("navPublish").addEventListener("click", () => { showSection("publishSection"); });
+    document.getElementById("backFromComments").addEventListener("click", () => { showSection("homeSection"); });
+    
+    const postsContainer = document.getElementById("postsContainer");
+    const postsQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+    onSnapshot(postsQuery, (snapshot) => {
+      postsContainer.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const post = docSnap.data();
+        const postDiv = document.createElement("div");
+        postDiv.className = "post";
+        postDiv.innerHTML = `
+          <div class="post-header">
+            <img src="${post.publisherPhoto || 'https://via.placeholder.com/50'}" alt="صورة الناشر" data-publisher="${post.uid}" style="cursor:pointer;">
+            <div>
+              <strong>${post.publisherName || "غير متوفر"} ${post.publisherVerified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : ''}</strong><br>
+              <small>${new Date(post.timestamp.seconds*1000).toLocaleString()}</small>
+            </div>
+          </div>
+          <p style="margin-top:10px;">${post.text}</p>
+          <div class="post-buttons">
+            <button class="like-btn" data-id="${docSnap.id}"><i class="fa-solid fa-heart"></i> <span id="likeCount_${docSnap.id}">${formatLikes(post.likes || 0)}</span></button>
+            <button class="comment-btn" data-id="${docSnap.id}"><i class="fa-solid fa-comment"></i></button>
+          </div>
+        `;
+        if(post.uid === currentUser?.uid){
+          postDiv.innerHTML += `<button class="delete-post-btn" data-id="${docSnap.id}"><i class="fa-solid fa-trash"></i></button>`;
+        }
+        postsContainer.appendChild(postDiv);
+        postDiv.querySelector("img").addEventListener("click", () => { loadPublisherProfile(post.uid); });
+        postDiv.querySelector(".like-btn").addEventListener("click", () => { likePost(docSnap.id); });
+        postDiv.querySelector(".comment-btn").addEventListener("click", () => { loadComments(docSnap.id); });
+        const deleteBtn = postDiv.querySelector(".delete-post-btn");
+        if(deleteBtn){
+          deleteBtn.addEventListener("click", async () => {
+            await deleteDoc(doc(db, "posts", docSnap.id));
+          });
+        }
+      });
+    });
+    
+    async function likePost(postId) {
+      const postRef = doc(db, "posts", postId);
+      await updateDoc(postRef, { likes: increment(1) });
+    }
+    
+    document.getElementById("publishPostBtn").addEventListener("click", async () => {
+      if(isPublishing) return;
+      const postBtn = document.getElementById("publishPostBtn");
+      const text = document.getElementById("postText").value;
+      if(text.trim()==="") return;
+      isPublishing = true;
+      postBtn.innerText = "جار النشر...";
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const userData = userDoc.exists()? userDoc.data() : {};
+      await addDoc(collection(db, "posts"), {
+        text: text,
+        uid: currentUser.uid,
+        publisherName: currentUser.displayName || "",
+        publisherPhoto: currentUser.photoURL || "",
+        publisherVerified: userData.verified || false,
+        timestamp: new Date(),
+        likes: 0
+      });
+      document.getElementById("postText").value = "";
+      postBtn.innerText = "نشر";
+      isPublishing = false;
+      alert("تم النشر");
+    });
+    
+    async function loadProfile() {
+      const profileCard = document.getElementById("profileCard");
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const userData = userDoc.exists()? userDoc.data() : {};
+      const totalLikes = await calculateTotalReactions(currentUser.uid);
+      const verifiedIcon = userData.verified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : '';
+      profileCard.innerHTML = `
+        <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i></button>
+        <img src="${userData.photoURL}" alt="صورة الملف الشخصي">
+        <h2>${currentUser.displayName || "غير متوفر"} ${verifiedIcon}</h2>
+        <p>${currentUser.email}</p>
+        <p>رقم الهاتف: ${userData.phone}</p>
+        <p>إجمالي التفاعلات: ${totalLikes}</p>
+      `;
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await signOut(auth);
+        location.reload();
+      });
+    }
+    
+    async function calculateTotalReactions(uid) {
+      let total = 0;
+      const q = query(collection(db, "posts"), where("uid", "==", uid));
+      const snapshot = await getDocs(q);
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        total += data.likes ? data.likes : 0;
+      });
+      return total;
+    }
+    
+    async function loadUserPosts() {
+      const userPostsContainer = document.getElementById("userPosts");
+      const q = query(collection(db, "posts"), where("uid", "==", currentUser.uid), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        userPostsContainer.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const post = docSnap.data();
+          const postDiv = document.createElement("div");
+          postDiv.className = "user-post";
+          postDiv.innerHTML = `<p>${post.text}</p>`;
+          userPostsContainer.appendChild(postDiv);
+        });
+      });
+    }
+    
+    document.getElementById("searchBtn").addEventListener("click", async () => {
+      const searchTerm = document.getElementById("searchInput").value.trim();
+      if(searchTerm==="") return;
+      const resultsContainer = document.getElementById("searchResults");
+      resultsContainer.innerHTML = "";
+      const usersRef = collection(db, "users");
+      const nameQuery = query(usersRef, where("name", ">=", searchTerm), where("name", "<=", searchTerm+"\uf8ff"));
+      const phoneQuery = query(usersRef, where("phone", ">=", searchTerm), where("phone", "<=", searchTerm+"\uf8ff"));
+      const resultSet = new Set();
+      const nameSnap = await getDocs(nameQuery);
+      nameSnap.forEach(docSnap => {
+        if(!resultSet.has(docSnap.id)){
+          resultSet.add(docSnap.id);
+          const userData = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "search-result";
+          div.innerHTML = `<p>${userData.name} ${userData.verified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : ''} - ${userData.phone}</p>`;
+          div.addEventListener("click", () => { loadPublisherProfile(docSnap.id); });
+          resultsContainer.appendChild(div);
+        }
+      });
+      const phoneSnap = await getDocs(phoneQuery);
+      phoneSnap.forEach(docSnap => {
+        if(!resultSet.has(docSnap.id)){
+          resultSet.add(docSnap.id);
+          const userData = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "search-result";
+          div.innerHTML = `<p>${userData.name} ${userData.verified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : ''} - ${userData.phone}</p>`;
+          div.addEventListener("click", () => { loadPublisherProfile(docSnap.id); });
+          resultsContainer.appendChild(div);
+        }
+      });
+    });
+    
+    async function loadPublisherProfile(uid) {
+      showSection("publisherProfileSection");
+      const publisherProfileCard = document.getElementById("publisherProfileCard");
+      const userDoc = await getDoc(doc(db, "users", uid));
+      const userData = userDoc.exists()? userDoc.data() : {};
+      const totalLikes = await calculateTotalReactions(uid);
+      const verifiedIcon = userData.verified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : '';
+      publisherProfileCard.innerHTML = `
+        <img src="${userData.photoURL}" alt="صورة الملف الشخصي">
+        <h2>${userData.name || "غير متوفر"} ${verifiedIcon}</h2>
+        <p>${userData.email || ""}</p>
+        <p>رقم الهاتف: ${userData.phone}</p>
+        <p>إجمالي التفاعلات: ${totalLikes}</p>
+      `;
+      loadPublisherPosts(uid);
+    }
+    
+    async function loadPublisherPosts(uid) {
+      const publisherPostsContainer = document.getElementById("publisherPosts");
+      const q = query(collection(db, "posts"), where("uid", "==", uid), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        publisherPostsContainer.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const post = docSnap.data();
+          const postDiv = document.createElement("div");
+          postDiv.className = "user-post";
+          postDiv.innerHTML = `<p>${post.text}</p>`;
+          publisherPostsContainer.appendChild(postDiv);
+        });
+      });
+    }
+    
+    async function loadComments(postId) {
+      currentPostId = postId;
+      showSection("commentsSection");
+      loadCommentsForPost(postId);
+    }
+    
+    async function loadCommentsForPost(postId) {
+      const commentsContainer = document.getElementById("commentsContainer");
+      const q = query(collection(db, "posts", postId, "comments"), orderBy("timestamp", "asc"));
+      onSnapshot(q, (snapshot) => {
+        commentsContainer.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const comment = docSnap.data();
+          let commentHTML = `
+            <div class="comment-card">
+              <img src="${comment.userPhoto}" alt="صورة المستخدم">
+              <div class="comment-content">
+                <strong>${comment.displayName || "غير متوفر"} ${comment.verified ? '<i class="fa-solid fa-circle-check verify-icon"></i>' : ''}</strong>
+                <p>${comment.text}</p>
+              </div>
+              ${comment.uid === currentUser.uid ? `<button class="delete-comment-btn" data-id="${docSnap.id}"><i class="fa-solid fa-trash"></i></button>` : ""}
+            </div>
+          `;
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = commentHTML;
+          commentsContainer.appendChild(tempDiv.firstElementChild);
+          const delBtn = commentsContainer.lastElementChild.querySelector(".delete-comment-btn");
+          if(delBtn){
+            delBtn.addEventListener("click", async () => {
+              await deleteDoc(doc(db, "posts", postId, "comments", docSnap.id));
+            });
+          }
+        });
+      });
+    }
+    
+    document.getElementById("addCommentBtn").addEventListener("click", async () => {
+      const commentText = document.getElementById("commentInput").value;
+      if(commentText.trim()==="") return;
+      await addDoc(collection(db, "posts", currentPostId, "comments"), {
+        text: commentText,
+        uid: currentUser.uid,
+        userPhoto: currentUser.photoURL,
+        displayName: currentUser.displayName || "",
+        verified: currentUserVerified,
+        timestamp: new Date()
+      });
+      document.getElementById("commentInput").value = "";
+    });
+  </script>
+</body>
+</html>
